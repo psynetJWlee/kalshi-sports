@@ -715,7 +715,7 @@
                 const v = parseFloat(m.volume_fp || m.volume || 0);
                 return sum + (isNaN(v) ? 0 : v);
             }, 0);
-            const isVolumeHigh = totalVolume > 150;
+            const isVolumeHigh = totalVolume > 200;
 
             const rows = allMarkets.map(m => {
                 const ticker = m.ticker || '-';
