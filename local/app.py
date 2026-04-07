@@ -1,14 +1,17 @@
 """
 Kalshi Sports Market Explorer - Flask Server
-Run: python app.py
+Run: cd local && python app.py
 Open: http://localhost:5000
 """
+
+import sys, os
+sys.path.insert(0, os.path.dirname(__file__))
 
 from flask import Flask, render_template, request, jsonify
 from datetime import datetime, timezone
 import kalshi_client as kc
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'))
 
 
 @app.route("/")
