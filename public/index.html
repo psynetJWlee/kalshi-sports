@@ -268,6 +268,20 @@
         }
         .price-yes { color: var(--green); }
         .price-no { color: var(--red); }
+        .volume-highlight {
+            color: #f59e0b;
+            font-weight: 700;
+            background: rgba(245, 158, 11, 0.10);
+        }
+        .volume-total-row td {
+            font-weight: 700;
+            background: var(--surface2);
+            border-top: 2px solid var(--border);
+        }
+        .volume-total-highlight {
+            color: #f59e0b;
+            font-size: 14px;
+        }
         .status-badge {
             display: inline-block;
             padding: 2px 8px;
@@ -696,7 +710,14 @@
                 return;
             }
 
-            body.innerHTML = allMarkets.map(m => {
+            // Calculate total volume
+            const totalVolume = allMarkets.reduce((sum, m) => {
+                const v = parseFloat(m.volume_fp || m.volume || 0);
+                return sum + (isNaN(v) ? 0 : v);
+            }, 0);
+            const isVolumeHigh = totalVolume > 150;
+
+            const rows = allMarkets.map(m => {
                 const ticker = m.ticker || '-';
                 const marketTitle = m.yes_sub_title || m.title || m.subtitle || ticker;
                 const yesPrice = m.yes_bid_dollars || m.last_price_dollars || '-';
@@ -708,6 +729,7 @@
                 // Build URL
                 const seriesTicker = extractSeriesTicker(ticker);
                 const kalshiUrl = buildMarketUrl(seriesTicker, ticker);
+                const volClass = isVolumeHigh ? 'volume-highlight' : '';
 
                 return `
                     <tr>
@@ -715,12 +737,24 @@
                         <td>${marketTitle}</td>
                         <td class="price price-yes">${formatPrice(yesPrice)}</td>
                         <td class="price price-no">${formatPrice(noPrice)}</td>
-                        <td>${volume}</td>
+                        <td class="${volClass}">${volume}</td>
                         <td><span class="status-badge ${statusClass}">${status}</span></td>
                         <td><a href="${kalshiUrl}" target="_blank" class="link-btn">Kalshi</a></td>
                     </tr>
                 `;
             }).join('');
+
+            // Add total row
+            const totalClass = isVolumeHigh ? 'volume-total-highlight' : '';
+            const totalRow = `
+                <tr class="volume-total-row">
+                    <td colspan="4" style="text-align:right;">총 거래량</td>
+                    <td class="${totalClass}">${totalVolume.toLocaleString()}</td>
+                    <td colspan="2"></td>
+                </tr>
+            `;
+
+            body.innerHTML = rows + totalRow;
 
         } catch (e) {
             body.innerHTML = `<tr><td colspan="7" class="error-msg">오류: ${e.message}</td></tr>`;
