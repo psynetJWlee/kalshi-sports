@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalshi Sports Market Explorer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #242836;
+            --border: #2e3346;
+            --text: #e4e6ef;
+            --text-dim: #8b8fa3;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --green: #22c55e;
+            --red: #ef4444;
+            --yellow: #f59e0b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* ─── Header ─── */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header .badge {
+            font-size: 11px;
+            background: var(--accent);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        /* ─── Layout ─── */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ─── Controls ─── */
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .control-group label {
+            font-size: 12px;
+            color: var(--text-dim);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .control-group select {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 180px;
+            outline: none;
+        }
+        .control-group input {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            /* min-width: 180px; */
+            outline: none;
+        }
+        .control-group select:focus,
+        .control-group input:focus {
+            border-color: var(--accent);
+        }
+        .btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+        .btn-secondary {
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        /* ─── Section ─── */
+        .section {
+            margin-bottom: 24px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title .count {
+            font-size: 12px;
+            background: var(--surface2);
+            color: var(--text-dim);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        /* ─── Milestone Cards (Games) ─── */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 12px;
+        }
+        .game-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .game-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+        }
+        .game-card.active {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.08);
+        }
+        .game-card .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .game-card .game-type {
+            font-size: 11px;
+            color: var(--accent);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .game-card .game-time {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+        .game-card .game-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .game-card .game-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            background: var(--accent);
+            color: white;
+            transition: all 0.15s;
+        }
+        .game-card .game-link:hover {
+            background: var(--accent-hover);
+            transform: scale(1.02);
+        }
+        .game-card .game-no-link {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        /* ─── Markets Table ─── */
+        .markets-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .markets-panel .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .markets-panel .panel-header h3 {
+            font-size: 15px;
+        }
+        .markets-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .markets-table th {
+            text-align: left;
+            padding: 10px 16px;
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+        }
+        .markets-table td {
+            padding: 10px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .markets-table tr:hover {
+            background: rgba(99, 102, 241, 0.04);
+        }
+        .markets-table .ticker {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+        .markets-table .price {
+            font-weight: 700;
+            font-family: 'Consolas', monospace;
+        }
+        .price-yes { color: var(--green); }
+        .price-no { color: var(--red); }
+        .volume-highlight {
+            color: #f59e0b;
+            font-weight: 700;
+            background: rgba(245, 158, 11, 0.10);
+        }
+        .volume-total-row td {
+            font-weight: 700;
+            background: var(--surface2);
+            border-top: 2px solid var(--border);
+        }
+        .volume-total-highlight {
+            color: #f59e0b;
+            font-size: 14px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-active { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+        .status-closed { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+        .status-settled { background: rgba(245, 158, 11, 0.15); color: var(--yellow); }
+
+        .link-btn {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            text-decoration: none;
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--accent);
+            font-weight: 600;
+            transition: all 0.15s;
+        }
+        .link-btn:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* ─── Helpers ─── */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-dim);
+        }
+        .loading .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-dim);
+        }
+        .error-msg {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--red);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .table-scroll {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        /* ─── Stats Bar ─── */
+        .stats-bar {
+            display: flex;
+            gap: 24px;
+            padding: 12px 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-item .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .stat-item .stat-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        /* ─── League Multi-Select ─── */
+        .league-selector {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 200px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .league-selector:hover { border-color: var(--accent); }
+        .league-selector .arrow { font-size: 10px; color: var(--text-dim); }
+        .league-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 100;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 0;
+            min-width: 350px;
+            max-height: 360px;
+            overflow-y: auto;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            margin-top: 4px;
+        }
+        .league-dropdown.open { display: block; width: 100%; }
+        .league-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .league-check:hover { background: var(--surface2); }
+        .league-check input { accent-color: var(--accent); cursor: pointer; }
+        .league-check-all {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .league-loading {
+            padding: 10px 14px;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+        .league-group-title {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px 14px 3px;
+            font-weight: 600;
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 768px) {
+            .controls { flex-direction: column; }
+            .control-group select,
+            .control-group input { min-width: 100%; }
+            .games-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div class="header">
+    <h1>Kalshi Sports Explorer</h1>
+    <span class="badge">LIVE</span>
+</div>
+
+<div class="container">
+
+    <!-- Controls -->
+    <div class="controls">
+        <div class="control-group">
+            <label>시작일</label>
+            <input type="date" id="dateFrom" onchange="refreshLeagues()" />
+        </div>
+        <div class="control-group">
+            <label>종료일</label>
+            <input type="date" id="dateTo" onchange="refreshLeagues()" />
+        </div>
+        <div class="control-group" style="position:relative;">
+            <label>리그</label>
+            <div class="league-selector" onclick="toggleLeagueDropdown(event)">
+                <span id="leagueLabel">전체</span>
+                <span class="arrow">▾</span>
+            </div>
+            <div class="league-dropdown" id="leagueDropdown">
+                <label class="league-check league-check-all">
+                    <input type="checkbox" id="leagueAll" checked onchange="toggleAll(this)"> 전체
+                </label>
+                <div id="leagueList">
+                    <div class="league-loading">날짜를 선택하면 리그 목록이 로드됩니다.</div>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary" onclick="loadMilestones()">검색</button>
+        <button class="btn btn-secondary" id="btnExcel" onclick="exportExcel()" style="display:none;">📥 엑셀 저장</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+        <div class="stat-item">
+            <span class="stat-value" id="statGames">-</span>
+            <span class="stat-label">경기</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value" id="statEvents">-</span>
+            <span class="stat-label">이벤트</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-value" id="statMarkets">-</span>
+            <span class="stat-label">마켓</span>
+        </div>
+    </div>
+
+    <!-- Games Section -->
+    <div class="section">
+        <div class="section-title">
+            경기 목록 (Milestones)
+            <span class="count" id="gamesCount">0</span>
+        </div>
+        <div id="gamesContainer" class="games-grid">
+            <div class="empty">날짜와 종목을 선택한 후 [검색]을 클릭하세요.</div>
+        </div>
+    </div>
+
+    <!-- Markets Section -->
+    <div class="section">
+        <div id="marketsPanel" class="markets-panel" style="display:none;">
+            <div class="panel-header">
+                <h3 id="marketsPanelTitle">마켓 목록</h3>
+                <span class="count" id="marketsCount">0</span>
+            </div>
+            <div class="table-scroll">
+                <table class="markets-table">
+                    <thead>
+                        <tr>
+                            <th>Ticker</th>
+                            <th>마켓 제목</th>
+                            <th>Yes 가격</th>
+                            <th>No 가격</th>
+                            <th>거래량</th>
+                            <th>상태</th>
+                            <th>URL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="marketsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ─── State ───
+    let allSeries = [];
+    let currentMilestones = [];
+    let seriesMap = {}; // ticker -> {title, slug}
+
+    // ─── Init ───
+    document.addEventListener('DOMContentLoaded', () => {
+        // Set today as default for both
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+        document.getElementById('dateFrom').value = todayStr;
+        document.getElementById('dateTo').value = todayStr;
+        loadSeriesMap();
+        refreshLeagues();
+    });
+
+    // ─── API Helpers ───
+    async function apiFetch(url) {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error(`API error: ${resp.status}`);
+        return resp.json();
+    }
+
+    // ─── Load Series Map (for URL building) ───
+    async function loadSeriesMap() {
+        try {
+            const data = await apiFetch('/api/series?category=Sports');
+            allSeries = data.series || [];
+            seriesMap = {};
+            allSeries.forEach(s => {
+                seriesMap[s.ticker] = {
+                    title: s.title,
+                    slug: slugify(s.title)
+                };
+            });
+        } catch (e) {
+            console.error('Series load error:', e);
+        }
+    }
+
+    // ─── Load Milestones ───
+    async function loadMilestones() {
+        const dateFrom = document.getElementById('dateFrom').value;
+        const dateTo = document.getElementById('dateTo').value;
+        const selectedLeagues = getSelectedLeagues();
+        const container = document.getElementById('gamesContainer');
+
+        container.innerHTML = '<div class="loading"><div class="spinner"></div><br>경기 로딩 중...</div>';
+
+        try {
+            let url = `/api/milestones?category=Sports&limit=500`;
+            if (dateFrom) url += `&min_date=${dateFrom}T00:00:00Z`;
+
+            const data = await apiFetch(url);
+            let milestones = data.milestones || [];
+
+            // Filter by date range (compare in UTC, YYYY-MM-DD)
+            if (dateFrom) {
+                milestones = milestones.filter(m => {
+                    const mDate = m.start_date ? m.start_date.substring(0, 10) : '';
+                    return mDate >= dateFrom;
+                });
+            }
+            if (dateTo) {
+                milestones = milestones.filter(m => {
+                    const mDate = m.start_date ? m.start_date.substring(0, 10) : '';
+                    return mDate <= dateTo;
+                });
+            }
+
+            // Filter by selected leagues
+            if (selectedLeagues.length > 0) {
+                milestones = milestones.filter(m => {
+                    const mLeague = (m.details && m.details.league) || '';
+                    return selectedLeagues.includes(mLeague);
+                });
+            }
+
+            currentMilestones = milestones;
+
+            document.getElementById('statGames').textContent = milestones.length;
+            document.getElementById('gamesCount').textContent = milestones.length;
+
+            if (milestones.length === 0) {
+                container.innerHTML = '<div class="empty">해당 날짜/종목의 경기가 없습니다.</div>';
+                return;
+            }
+
+            container.innerHTML = milestones.map((m, i) => {
+                const time = m.start_date ? formatTime(m.start_date) : '-';
+                const allTickers = m.related_event_tickers || [];
+                const gameTicker = allTickers.find(t => /GAME/i.test(t));
+                const gameUrl = gameTicker ? buildEventUrl(gameTicker) : null;
+
+                return `
+                    <div class="game-card" data-index="${i}" onclick="selectGame(${i})">
+                        <div class="game-header">
+                            <span class="game-type">${m.type || m.category || 'Sports'}</span>
+                            <span class="game-time">${time}</span>
+                        </div>
+                        <div class="game-title">${m.title || 'Unknown Game'}</div>
+                        ${gameUrl
+                            ? `<a href="${gameUrl}" target="_blank" class="game-link" onclick="event.stopPropagation()">
+                                 Kalshi에서 보기 →
+                               </a>`
+                            : `<span class="game-no-link">승패 마켓 없음</span>`
+                        }
+                    </div>
+                `;
+            }).join('');
+
+            // Count total events
+            let totalEvents = 0;
+            milestones.forEach(m => totalEvents += (m.related_event_tickers || []).length);
+            document.getElementById('statEvents').textContent = totalEvents;
+
+            // Show excel button if results exist
+            document.getElementById('btnExcel').style.display = milestones.length > 0 ? '' : 'none';
+
+        } catch (e) {
+            container.innerHTML = `<div class="error-msg">오류: ${e.message}</div>`;
+        }
+    }
+
+    // ─── Select a Game → Load Markets ───
+    async function selectGame(index) {
+        const milestone = currentMilestones[index];
+        if (!milestone) return;
+
+        // Highlight selected card
+        document.querySelectorAll('.game-card').forEach(c => c.classList.remove('active'));
+        document.querySelector(`.game-card[data-index="${index}"]`).classList.add('active');
+
+        const panel = document.getElementById('marketsPanel');
+        const body = document.getElementById('marketsBody');
+        const title = document.getElementById('marketsPanelTitle');
+
+        panel.style.display = 'block';
+        title.textContent = `${milestone.title} - 마켓 목록`;
+        body.innerHTML = `<tr><td colspan="7" class="loading"><div class="spinner"></div><br>마켓 로딩 중...</td></tr>`;
+
+        try {
+            const eventTickers = [
+                ...(milestone.primary_event_tickers || []),
+                ...(milestone.related_event_tickers || [])
+            ];
+            // Deduplicate, only keep GAME series (win/loss markets)
+            const uniqueTickers = [...new Set(eventTickers)]
+                .filter(t => /GAME/i.test(t));
+
+            let allMarkets = [];
+
+            for (const et of uniqueTickers) {
+                try {
+                    const data = await apiFetch(`/api/markets?event_ticker=${encodeURIComponent(et)}`);
+                    const markets = data.markets || [];
+                    markets.forEach(m => m._event_ticker = et);
+                    allMarkets = allMarkets.concat(markets);
+                } catch (err) {
+                    console.warn(`Failed to load markets for ${et}:`, err);
+                }
+            }
+
+            document.getElementById('statMarkets').textContent = allMarkets.length;
+            document.getElementById('marketsCount').textContent = allMarkets.length;
+
+            if (allMarkets.length === 0) {
+                body.innerHTML = `<tr><td colspan="7" class="empty">마켓이 없습니다.</td></tr>`;
+                return;
+            }
+
+            // Calculate total volume
+            const totalVolume = allMarkets.reduce((sum, m) => {
+                const v = parseFloat(m.volume_fp || m.volume || 0);
+                return sum + (isNaN(v) ? 0 : v);
+            }, 0);
+            const isVolumeHigh = totalVolume > 200;
+
+            const rows = allMarkets.map(m => {
+                const ticker = m.ticker || '-';
+                const marketTitle = m.yes_sub_title || m.title || m.subtitle || ticker;
+                const yesPrice = m.yes_bid_dollars || m.last_price_dollars || '-';
+                const noPrice = m.no_bid_dollars || '-';
+                const volume = m.volume_fp || m.volume || '-';
+                const status = m.status || '-';
+                const statusClass = getStatusClass(status);
+
+                // Build URL
+                const seriesTicker = extractSeriesTicker(ticker);
+                const kalshiUrl = buildMarketUrl(seriesTicker, ticker);
+                const volClass = isVolumeHigh ? 'volume-highlight' : '';
+
+                return `
+                    <tr>
+                        <td class="ticker">${ticker}</td>
+                        <td>${marketTitle}</td>
+                        <td class="price price-yes">${formatPrice(yesPrice)}</td>
+                        <td class="price price-no">${formatPrice(noPrice)}</td>
+                        <td class="${volClass}">${volume}</td>
+                        <td><span class="status-badge ${statusClass}">${status}</span></td>
+                        <td><a href="${kalshiUrl}" target="_blank" class="link-btn">Kalshi</a></td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Add total row
+            const totalClass = isVolumeHigh ? 'volume-total-highlight' : '';
+            const totalRow = `
+                <tr class="volume-total-row">
+                    <td colspan="4" style="text-align:right;">총 거래량</td>
+                    <td class="${totalClass}">${totalVolume.toLocaleString()}</td>
+                    <td colspan="2"></td>
+                </tr>
+            `;
+
+            body.innerHTML = rows + totalRow;
+
+        } catch (e) {
+            body.innerHTML = `<tr><td colspan="7" class="error-msg">오류: ${e.message}</td></tr>`;
+        }
+    }
+
+    // ─── Helpers ───
+    function slugify(text) {
+        return text.toLowerCase().trim()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/[\s_]+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+    }
+
+    function extractSeriesTicker(ticker) {
+        // "KXNBAGAME-26APR06DETORL" -> "KXNBAGAME"
+        const dashIdx = ticker.indexOf('-');
+        return dashIdx > 0 ? ticker.substring(0, dashIdx) : ticker;
+    }
+
+    function buildEventUrl(eventTicker) {
+        // Build: https://kalshi.com/markets/{series}/{slug}/{event_ticker}
+        const seriesTicker = extractSeriesTicker(eventTicker);
+        const info = seriesMap[seriesTicker];
+        const slug = info ? info.slug : seriesTicker.toLowerCase();
+        return `https://kalshi.com/markets/${seriesTicker.toLowerCase()}/${slug}/${eventTicker.toLowerCase()}`;
+    }
+
+    function buildMarketUrl(seriesTicker, marketTicker) {
+        const info = seriesMap[seriesTicker];
+        if (info) {
+            return `https://kalshi.com/markets/${seriesTicker}/${info.slug}/${marketTicker}`;
+        }
+        return `https://kalshi.com/markets/${seriesTicker}/${seriesTicker}/${marketTicker}`;
+    }
+
+    function formatPrice(val) {
+        if (!val || val === '-') return '-';
+        if (typeof val === 'string' && val.includes('.')) {
+            const num = parseFloat(val);
+            return isNaN(num) ? val : `${(num * 100).toFixed(0)}%`;
+        }
+        if (typeof val === 'number') {
+            return val <= 1 ? `${(val * 100).toFixed(0)}%` : `${val}`;
+        }
+        return val;
+    }
+
+    function formatTime(isoStr) {
+        try {
+            const d = new Date(isoStr);
+            const month = d.getMonth() + 1;
+            const day = d.getDate();
+            const hours = String(d.getHours()).padStart(2, '0');
+            const mins = String(d.getMinutes()).padStart(2, '0');
+            return `${month}/${day} ${hours}:${mins}`;
+        } catch {
+            return isoStr;
+        }
+    }
+
+    function getStatusClass(status) {
+        if (status === 'active' || status === 'open') return 'status-active';
+        if (status === 'closed' || status === 'determined') return 'status-closed';
+        if (status === 'settled') return 'status-settled';
+        return '';
+    }
+
+    // ─── League Category Mapping ───
+    const leagueSport = {
+        'NBA': 'Basketball', 'NCAAMB': 'Basketball', 'South Korea KBL': 'Basketball',
+        'EuroLeague': 'Basketball', 'EuroCup': 'Basketball',
+        'Chinese Basketball Association': 'Basketball', 'Japan B League': 'Basketball',
+        'Liga Nacional de Basquetbol': 'Basketball', 'Russia VTB United League': 'Basketball',
+        'Turkey BSL': 'Basketball', 'Adriatic ABA League': 'Basketball', 'Germany BBL': 'Basketball',
+        'FIBA Champions League': 'Basketball', 'FIBA Europe Cup': 'Basketball',
+        'MLB': 'Baseball', 'Korea KBO': 'Baseball', 'Japan NPB': 'Baseball',
+        'College Baseball': 'Baseball',
+        'NHL': 'Hockey', 'AHL': 'Hockey', 'KHL': 'Hockey', 'SHL': 'Hockey',
+        'Czech Extraliga': 'Hockey', 'Finland Liiga': 'Hockey',
+        'Germany DEL': 'Hockey', 'Switzerland National League': 'Hockey',
+        'NFL': 'Football', 'UFL': 'Football', 'College Football': 'Football',
+        'IPL': 'Cricket', 'PSL': 'Cricket', 'T20 International': 'Cricket',
+        'AFL': 'Aussie Rules',
+    };
+    function getSport(league) {
+        if (leagueSport[league]) return leagueSport[league];
+        // Guess soccer for unknown
+        return 'Soccer';
+    }
+
+    // ─── Refresh Leagues from API ───
+    async function refreshLeagues() {
+        const dateFrom = document.getElementById('dateFrom').value;
+        const dateTo = document.getElementById('dateTo').value;
+        const listEl = document.getElementById('leagueList');
+
+        if (!dateFrom) return;
+
+        listEl.innerHTML = '<div class="league-loading">리그 로딩 중...</div>';
+
+        try {
+            let url = `/api/milestones?category=Sports&limit=500&min_date=${dateFrom}T00:00:00Z`;
+            const data = await apiFetch(url);
+            let milestones = data.milestones || [];
+
+            // Filter by date range
+            if (dateTo) {
+                milestones = milestones.filter(m => {
+                    const mDate = m.start_date ? m.start_date.substring(0, 10) : '';
+                    return mDate <= dateTo;
+                });
+            }
+            if (dateFrom) {
+                milestones = milestones.filter(m => {
+                    const mDate = m.start_date ? m.start_date.substring(0, 10) : '';
+                    return mDate >= dateFrom;
+                });
+            }
+
+            // Count games per league
+            const leagueCounts = {};
+            milestones.forEach(m => {
+                const league = (m.details && m.details.league) || '';
+                if (!league) return;
+                leagueCounts[league] = (leagueCounts[league] || 0) + 1;
+            });
+
+            // Group by sport
+            const sportGroups = {};
+            Object.keys(leagueCounts).sort().forEach(league => {
+                const sport = getSport(league);
+                if (!sportGroups[sport]) sportGroups[sport] = [];
+                sportGroups[sport].push({ league, count: leagueCounts[league] });
+            });
+
+            // Render checkboxes
+            let html = '';
+            const sportOrder = ['Basketball','Baseball','Hockey','Football','Soccer','Cricket','Aussie Rules','Other'];
+            const allSports = [...new Set([...sportOrder, ...Object.keys(sportGroups)])];
+
+            allSports.forEach(sport => {
+                const leagues = sportGroups[sport];
+                if (!leagues || leagues.length === 0) return;
+                html += `<div class="league-group-title">${sport}</div>`;
+                leagues.forEach(({ league, count }) => {
+                    html += `<label class="league-check">
+                        <input type="checkbox" value="${league}" onchange="updateLeague()"> ${league} (${count})
+                    </label>`;
+                });
+            });
+
+            if (!html) {
+                html = '<div class="league-loading">해당 기간에 경기가 없습니다.</div>';
+            }
+
+            listEl.innerHTML = html;
+            document.getElementById('leagueAll').checked = true;
+            updateLeagueLabel();
+
+        } catch (e) {
+            listEl.innerHTML = `<div class="league-loading">오류: ${e.message}</div>`;
+        }
+    }
+
+    // ─── League Multi-Select ───
+    function toggleLeagueDropdown(e) {
+        e.stopPropagation();
+        document.getElementById('leagueDropdown').classList.toggle('open');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        const dd = document.getElementById('leagueDropdown');
+        if (!e.target.closest('.league-dropdown') && !e.target.closest('.league-selector')) {
+            dd.classList.remove('open');
+        }
+    });
+
+    function getSelectedLeagues() {
+        const allChecked = document.getElementById('leagueAll').checked;
+        if (allChecked) return []; // empty = no filter = all
+        const boxes = document.querySelectorAll('.league-dropdown input[type="checkbox"][value]');
+        return [...boxes].filter(cb => cb.checked).map(cb => cb.value);
+    }
+
+    function toggleAll(checkbox) {
+        const boxes = document.querySelectorAll('.league-dropdown input[type="checkbox"][value]');
+        boxes.forEach(cb => cb.checked = false);
+        updateLeagueLabel();
+    }
+
+    function updateLeague() {
+        const boxes = document.querySelectorAll('.league-dropdown input[type="checkbox"][value]');
+        const checked = [...boxes].filter(cb => cb.checked);
+        document.getElementById('leagueAll').checked = checked.length === 0;
+        updateLeagueLabel();
+    }
+
+    function updateLeagueLabel() {
+        const allChecked = document.getElementById('leagueAll').checked;
+        const boxes = document.querySelectorAll('.league-dropdown input[type="checkbox"][value]');
+        const checked = [...boxes].filter(cb => cb.checked);
+        const label = document.getElementById('leagueLabel');
+
+        if (allChecked || checked.length === 0) {
+            label.textContent = '전체';
+        } else if (checked.length <= 3) {
+            label.textContent = checked.map(cb => cb.value.replace(/\s*\(.*\)/, '')).join(', ');
+        } else {
+            label.textContent = `${checked.length}개 리그 선택`;
+        }
+    }
+
+    // ─── Excel Export ───
+    function exportExcel() {
+        const cards = document.querySelectorAll('.game-card');
+        if (cards.length === 0) return alert('내보낼 경기 데이터가 없습니다.');
+
+        const rows = [];
+        cards.forEach(card => {
+            const title = card.querySelector('.game-title')?.textContent?.trim() || '';
+            const time = card.querySelector('.game-time')?.textContent?.trim() || '';
+            const link = card.querySelector('.game-link')?.href || '';
+            rows.push({ '경기': title, '일시': time, 'Kalshi URL': link });
+        });
+
+        const ws = XLSX.utils.json_to_sheet(rows);
+
+        // Column widths
+        ws['!cols'] = [
+            { wch: 35 },  // 경기
+            { wch: 14 },  // 일시
+            { wch: 80 },  // URL
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Games');
+
+        const dateFrom = document.getElementById('dateFrom').value || 'all';
+        const dateTo = document.getElementById('dateTo').value || '';
+        const leagues = getSelectedLeagues();
+        const leagueStr = leagues.length > 0 ? leagues.join('_') : 'all';
+        const fileName = `kalshi_${leagueStr}_${dateFrom}${dateTo && dateTo !== dateFrom ? '_to_' + dateTo : ''}.xlsx`;
+
+        XLSX.writeFile(wb, fileName);
+    }
+</script>
+
+</body>
+</html>
