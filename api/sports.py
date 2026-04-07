@@ -1,6 +1,8 @@
 from http.server import BaseHTTPRequestHandler
 import json
-from _kalshi_client import get_filters_by_sport
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from lib_kalshi_client import get_filters_by_sport
 
 
 class handler(BaseHTTPRequestHandler):

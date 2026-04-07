@@ -1,7 +1,9 @@
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import json
-from _kalshi_client import get_markets, get_series, enrich_markets_with_urls
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from lib_kalshi_client import get_markets, get_series, enrich_markets_with_urls
 
 
 class handler(BaseHTTPRequestHandler):
