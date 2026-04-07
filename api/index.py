@@ -4,7 +4,7 @@ import os
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
-            html_path = os.path.join(os.path.dirname(__file__), 'index.html')
+            html_path = os.path.join(os.path.dirname(__file__), '_page.html')
             with open(html_path, 'r', encoding='utf-8') as f:
                 html = f.read()
             self.send_response(200)
