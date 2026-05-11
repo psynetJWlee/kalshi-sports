@@ -61,6 +61,7 @@ def api_milestones():
             limit=limit,
             cursor=cursor,
         )
+        kc.enrich_milestones_with_sport(data.get("milestones", []))
         return jsonify(data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

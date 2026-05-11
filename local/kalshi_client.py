@@ -76,6 +76,82 @@ def get_filters_by_sport():
     return _get("/search/filters_by_sport")
 
 
+# ─── Sport Categorization ───────────────────────────────
+
+# Maps Kalshi milestone `type` to a stable sport_category label.
+# Authoritative because Kalshi sets `type` per milestone (e.g. basketball_game)
+# rather than relying on free-text league names.
+SPORT_BY_TYPE = {
+    "basketball_game": "Basketball",
+    "soccer_tournament_multi_leg": "Soccer",
+    "soccer_game": "Soccer",
+    "baseball_game": "Baseball",
+    "hockey_match": "Hockey",
+    "hockey_tournament": "Hockey",
+    "football_game": "Football",
+    "cricket_match": "Cricket",
+    "afl_match": "Aussie Rules",
+    "tennis_tournament_singles": "Tennis",
+    "tennis_match": "Tennis",
+    "boxing_match": "Combat Sports",
+    "mma_match": "Combat Sports",
+    "rugby_match": "Rugby",
+    "lacrosse_match": "Lacrosse",
+    "racing_tournament": "Racing",
+    "squash_match": "Squash",
+    "golf_tournament": "Golf",
+}
+
+# Secondary fallback: league name → sport, used when milestone `type` is
+# generic (e.g. one_off_milestone) or missing.
+SPORT_BY_LEAGUE = {
+    # Basketball
+    "NBA": "Basketball", "WNBA": "Basketball", "NCAAMB": "Basketball",
+    "South Korea KBL": "Basketball", "EuroLeague": "Basketball",
+    "EuroCup": "Basketball", "Chinese Basketball Association": "Basketball",
+    "Japan B League": "Basketball", "Liga Nacional de Basquetbol": "Basketball",
+    "Russia VTB United League": "Basketball", "Turkey BSL": "Basketball",
+    "Adriatic ABA League": "Basketball", "Germany BBL": "Basketball",
+    "FIBA Champions League": "Basketball", "FIBA Europe Cup": "Basketball",
+    "Italy Serie A": "Basketball", "Greek Basketball League": "Basketball",
+    "Israeli Super League": "Basketball", "LNB Elite": "Basketball",
+    "Spain Liga ACB": "Basketball", "New Zealand NBL": "Basketball",
+    # Baseball
+    "MLB": "Baseball", "Korea KBO": "Baseball", "Japan NPB": "Baseball",
+    "College Baseball": "Baseball",
+    # Hockey
+    "NHL": "Hockey", "AHL": "Hockey", "KHL": "Hockey", "SHL": "Hockey",
+    "Czech Extraliga": "Hockey", "Finland Liiga": "Hockey",
+    "Germany DEL": "Hockey", "Switzerland National League": "Hockey",
+    # Football
+    "NFL": "Football", "UFL": "Football", "College Football": "Football",
+    # Cricket
+    "IPL": "Cricket", "PSL": "Cricket", "T20 International": "Cricket",
+    # Aussie Rules
+    "AFL": "Aussie Rules",
+}
+
+
+def classify_sport(milestone_type, league=None):
+    """
+    Resolve a milestone's sport category.
+    Priority: milestone.type (authoritative) → league name → 'Other'.
+    """
+    if milestone_type and milestone_type in SPORT_BY_TYPE:
+        return SPORT_BY_TYPE[milestone_type]
+    if league and league in SPORT_BY_LEAGUE:
+        return SPORT_BY_LEAGUE[league]
+    return "Other"
+
+
+def enrich_milestones_with_sport(milestones):
+    """Inject `sport_category` field into each milestone in-place."""
+    for m in milestones:
+        league = (m.get("details") or {}).get("league") or ""
+        m["sport_category"] = classify_sport(m.get("type"), league)
+    return milestones
+
+
 # ─── Milestones (Games) ─────────────────────────────────
 
 def get_milestones(category=None, competition=None, milestone_type=None,
